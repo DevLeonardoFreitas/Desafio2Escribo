@@ -1,8 +1,9 @@
 import 'dart:convert';
-
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_file_downloader/flutter_file_downloader.dart';
 import 'package:http/http.dart' as http;
-import 'models/Book.dart';
+import 'models/book.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -16,7 +17,6 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     books = getBooks();
   }
@@ -24,7 +24,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('MyBooks')),
+      appBar: AppBar(title: const Text('MyBooks')),
       body: Center(
         child: FutureBuilder<List<Book>>(
           future: books,
@@ -35,8 +35,17 @@ class _HomePageState extends State<HomePage> {
                   itemBuilder: (context, index) {
                     Book book = snapshot.data![index];
                     return ListTile(
+                      leading: Image.network(book.coverUrl.toString()),
                       title: Text(book.title!),
                       subtitle: Text(book.author!),
+                      onLongPress: () => {
+                        FileDownloader.downloadFile(
+                          url: book.downloadUrl.toString(),
+                          name: book.title.toString().trim(),
+                          downloadDestination:
+                              DownloadDestinations.publicDownloads,
+                        )
+                      },
                     );
                   });
             } else if (snapshot.hasError) {

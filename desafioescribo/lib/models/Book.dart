@@ -17,11 +17,11 @@ class Book {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = Map<String, dynamic>();
-    data['id'] = this.id;
-    data['title'] = this.title;
-    data['author'] = this.author;
-    data['cover_url'] = this.coverUrl;
-    data['download_url'] = this.downloadUrl;
+    data['id'] = id;
+    data['title'] = title;
+    data['author'] = author;
+    data['cover_url'] = coverUrl;
+    data['download_url'] = downloadUrl;
     return data;
   }
 }
