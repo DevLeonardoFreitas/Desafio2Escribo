@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_file_downloader/flutter_file_downloader.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
+import 'package:vocsy_epub_viewer/epub_viewer.dart';
 import 'models/book.dart';
 // import 'package:vocsy_epub_viewer/epub_viewer.dart';
 
@@ -20,11 +21,11 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     books = getBooks();
-    print(getDownloadsDirectory().toString());
   }
 
   @override
   Widget build(BuildContext context) {
+    List<String> favourites = [];
     return Scaffold(
       appBar: AppBar(title: const Text('MyBooks')),
       body: Center(
@@ -40,40 +41,13 @@ class _HomePageState extends State<HomePage> {
                       leading: Image.network(book.coverUrl.toString()),
                       title: Text(book.title!),
                       subtitle: Text(book.author!),
-                      onLongPress: () => {
-                        FileDownloader.downloadFile(
-                          url: book.downloadUrl.toString(),
-                          name: book.title.toString().trim() + '.epub',
-                          downloadDestination:
-                              DownloadDestinations.publicDownloads,
-                        )
+                      onLongPress: () {
+                        downloadBook(book);
                       },
-                      onTap: () => {
-                        // VocsyEpub.setConfig(
-                        //   themeColor: Theme.of(context).primaryColor,
-                        //   identifier: "iosBook",
-                        //   scrollDirection: EpubScrollDirection.ALLDIRECTIONS,
-                        //   allowSharing: true,
-                        //   enableTts: true,
-                        //   nightMode: true,
-                        // ),
-
-                        // // get current locator
-                        // VocsyEpub.locatorStream.listen((locator) {
-                        //   print('LOCATOR: $locator');
-                        // }),
-
-                        // VocsyEpub.open(
-                        //   getDownloadsDirectory().toString(),
-                        //   lastLocation: EpubLocator.fromJson({
-                        //     "bookId": "2239",
-                        //     "href": "/OEBPS/ch06.xhtml",
-                        //     "created": 1539934158390,
-                        //     "locations": {
-                        //       "cfi": "epubcfi(/0!/4/4[simple_book]/2/2/6)"
-                        //     }
-                        //   }),
-                        // )
+                      onTap: () {
+                        openBook('/storage/emulated/0/Download/' +
+                            book.title.toString() +
+                            '.epub');
                       },
                     );
                   });
@@ -85,6 +59,42 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+
+  void downloadBook(book) {
+    FileDownloader.downloadFile(
+      url: book.downloadUrl.toString(),
+      name: book.title.toString() + '.epub',
+      downloadDestination: DownloadDestinations.publicDownloads,
+      onDownloadCompleted: (String path) {
+        print('FILE DOWNLOADED TO PATH: $path');
+      },
+      notificationType: NotificationType.all,
+    );
+  }
+
+  void openBook(String localpath) {
+    print(">>>>>>>>>>>>>>" + localpath);
+    VocsyEpub.setConfig(
+      themeColor: Theme.of(context).primaryColor,
+      identifier: "Book",
+      scrollDirection: EpubScrollDirection.ALLDIRECTIONS,
+      allowSharing: true,
+      enableTts: true,
+      nightMode: false,
+    );
+    VocsyEpub.open(
+      localpath,
+      lastLocation: EpubLocator.fromJson({
+        "bookId": "2239",
+        "href": "/OEBPS/ch06.xhtml",
+        "created": 1539934158390,
+        "locations": {"cfi": "epubcfi(/0!/4/4[simple_book]/2/2/6)"}
+      }),
+    );
+    VocsyEpub.locatorStream.listen((locator) {
+      print('LOCATOR: ${EpubLocator.fromJson(jsonDecode(locator))}');
+    });
   }
 
   Future<List<Book>> getBooks() async {
