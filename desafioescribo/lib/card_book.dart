@@ -5,10 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_file_downloader/flutter_file_downloader.dart';
 import 'package:vocsy_epub_viewer/epub_viewer.dart';
 
+// ignore: must_be_immutable
 class CardBook extends StatelessWidget {
   Book book;
 
-  CardBook(this.book);
+  CardBook(this.book, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,8 +18,11 @@ class CardBook extends StatelessWidget {
       child: Column(
         children: [
           GestureDetector(
-            child: Image.network(
-              book.coverUrl.toString(),
+            child: Padding(
+              padding: EdgeInsets.all(10),
+              child: Image.network(
+                book.coverUrl.toString(),
+              ),
             ),
             onLongPress: () {
               downloadBook(book);
